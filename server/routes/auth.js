@@ -8,25 +8,22 @@ const User = require('../models/User');
 router.post('/register', async (req, res) => {
   const { name, email, password, role, phone } = req.body;
   try {
-    // Validate required fields
     if (!name || !email || !password || !role || !phone) {
       return res.status(400).json({ msg: 'All fields are required' });
     }
 
-    // Check if user already exists
     let user = await User.findOne({ email });
     if (user) {
       return res.status(400).json({ msg: 'User already exists' });
     }
 
-    // Create new user
     user = new User({ name, email, password, role, phone });
     user.password = await bcrypt.hash(password, 10);
     await user.save();
 
     res.json({ user: { _id: user._id, name: user.name, email: user.email, role: user.role, phone: user.phone } });
   } catch (err) {
-    console.error('Register error:', err); // Add error logging
+    console.error('Register error:', err);
     res.status(500).json({ msg: 'Server error' });
   }
 });

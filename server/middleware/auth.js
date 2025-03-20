@@ -11,7 +11,6 @@ module.exports = function (req, res, next) {
     req.user = decoded;
     next();
   } catch (err) {
-    console.error('Token verification error:', err);
     res.status(401).json({ msg: 'Token is not valid' });
   }
 };

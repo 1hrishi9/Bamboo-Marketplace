@@ -5,6 +5,7 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import Cart from './pages/Cart';
 import Profile from './pages/Profile';
+import Orders from './pages/Orders';
 import Success from './pages/Success';
 import DealerDashboard from './pages/DealerDashboard';
 import AdminDashboard from './pages/AdminDashboard';
@@ -14,8 +15,10 @@ import ProtectedRoute from './components/ProtectedRoute';
 function App() {
   const navigate = useNavigate();
   const userRole = sessionStorage.getItem('userRole') || 'citizen';
+  const userId = sessionStorage.getItem('userId');
 
   useEffect(() => {
+    console.log('App.js - userId:', userId, 'userRole:', userRole); // Debug session state
     const sessionTimeout = 30 * 60 * 1000; // 30 minutes
     const lastActivity = sessionStorage.getItem('lastActivity');
     const currentTime = Date.now();
@@ -64,22 +67,30 @@ function App() {
           <div className="container mx-auto flex justify-between items-center">
             <Link to="/" className="text-white text-xl font-bold">Bamboo Marketplace</Link>
             <div className="space-x-4">
-              <Link to="/login" className="text-white hover:text-green-200">Login</Link>
-              <Link to="/register" className="text-white hover:text-green-200">Register</Link>
-              <Link to="/cart" className="text-white hover:text-green-200">Cart</Link>
-              <Link to="/profile" className="text-white hover:text-green-200">Profile</Link>
-              {userRole === 'dealer' && (
-                <Link to="/dealer-dashboard" className="text-white hover:text-green-200">Dealer Dashboard</Link>
+              {!userId ? (
+                <>
+                  <Link to="/login" className="text-white hover:text-green-200">Login</Link>
+                  <Link to="/register" className="text-white hover:text-green-200">Register</Link>
+                </>
+              ) : (
+                <>
+                  <Link to="/cart" className="text-white hover:text-green-200">Cart</Link>
+                  <Link to="/orders" className="text-white hover:text-green-200">Orders</Link>
+                  <Link to="/profile" className="text-white hover:text-green-200">My Account</Link>
+                  {userRole === 'dealer' && (
+                    <Link to="/dealer-dashboard" className="text-white hover:text-green-200">Dealer Dashboard</Link>
+                  )}
+                  {userRole === 'superadmin' && (
+                    <Link to="/admin-dashboard" className="text-white hover:text-green-200">Admin Dashboard</Link>
+                  )}
+                  <button
+                    onClick={handleLogout}
+                    className="text-white hover:text-green-200"
+                  >
+                    Logout
+                  </button>
+                </>
               )}
-              {userRole === 'superadmin' && (
-                <Link to="/admin-dashboard" className="text-white hover:text-green-200">Admin Dashboard</Link>
-              )}
-              <button
-                onClick={handleLogout}
-                className="text-white hover:text-green-200"
-              >
-                Logout
-              </button>
             </div>
           </div>
         </nav>
@@ -88,6 +99,7 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/cart" element={<ProtectedRoute allowedRoles={['citizen', 'dealer', 'superadmin']}><Cart /></ProtectedRoute>} />
+          <Route path="/orders" element={<ProtectedRoute allowedRoles={['citizen', 'dealer', 'superadmin']}><Orders /></ProtectedRoute>} />
           <Route path="/profile" element={<ProtectedRoute allowedRoles={['citizen', 'dealer', 'superadmin']}><Profile /></ProtectedRoute>} />
           <Route path="/success" element={<Success />} />
           <Route path="/dealer-dashboard" element={<ProtectedRoute allowedRoles={['dealer']}><DealerDashboard /></ProtectedRoute>} />
